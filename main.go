@@ -6,12 +6,10 @@ import (
 	"os"
 
 	"RNTreaty/cmd/api"
-	"RNTreaty/handlers"
 	"RNTreaty/model"
 
 	databaseConfig "RNTreaty/db"
 
-	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
 )
 
@@ -21,19 +19,26 @@ func main() {
 		slog.Error(err.Error())
 	}
 
-	// Config initialization
+	// Port initialization
 	port := os.Getenv("PORT")
 	if port == "" {
 		slog.Error("PORT NOT FOUND")
 	}
 
+	// Database initialization
 	dbConnection := os.Getenv("DATABASE_URL")
 	if dbConnection == "" {
 		slog.Error("DATABASE URL NOT FOUND")
 	}
 
+	// Host initialization
+	host := os.Getenv("HOST")
+	if host == "" {
+		slog.Error("HOST not found")
+	}
+
 	cfg := &model.Config{
-		Host:          "localhost",
+		Host:          host,
 		Port:          port,
 		ConnectionURL: dbConnection,
 	}
@@ -46,18 +51,8 @@ func main() {
 	db := databaseConfig.ConnectDB(ctx, cfg)
 	defer db.Close()
 
-	// Repo Layer
-	// treatyRepo := NewTreatyRepo(db)
-
-	// Usecase Layer
-	// usecase := NewTreatyUseCase(treatyRepo)
-
-	// Handlers
-	route := chi.NewRouter()
-	route = handlers.NewHealthzHandler(route)
-
 	// Server Loop
-	app := api.NewTreatyAPI(cfg, db, route)
+	app := api.NewTreatyAPI(cfg, db)
 	if runErr := app.Run(); runErr != nil {
 		slog.Error(runErr.Error())
 	}

@@ -1,6 +1,13 @@
 main_package_path = .
 binary_name = RNTreatyBackend
 
+-include .env
+export
+
+## POSTGRES URL
+DB_URL ?= postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable
+MIGRATE_DIR ?= db/migrations
+
 # ================================================================= #
 # QUALITY CONTROL
 # ================================================================= #
@@ -35,6 +42,16 @@ create-migration:
 	touch db/migrations/$${TIMESTAMP}_$(name).down.sql; \
 	echo "Created db/migrations/$${TIMESTAMP}_$(name).up.sql"; \
 	echo "Created db/migrations/$${TIMESTAMP}_$(name).down.sql"
+
+.PHONY: migrate-up
+# Apply all up migrations
+migrate-up:
+	migrate -path $(MIGRATE_DIR) -database "$(DB_URL)" -verbose up
+
+.PHONY: migrate-down
+# Roll back the last down migration (or usage: make migrate-down steps=2)
+migrate-down:
+	migrate -path $(MIGRATE_DIR) -database "$(DB_URL)" -verbose down $(steps)
 
 
 ## tidy: tidy modfiles and modernize and format .go files

@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"RNTreaty/handlers"
 	"RNTreaty/model"
 
 	"github.com/go-chi/chi"
@@ -21,10 +22,22 @@ type App struct {
 	Server   *http.Server
 }
 
-func NewTreatyAPI(cfg *model.Config, db *pgxpool.Pool, handlers *chi.Mux) *App {
+func NewTreatyAPI(cfg *model.Config, db *pgxpool.Pool) *App {
+	// Repo Layer
+	// treatyRepo := NewTreatyRepo(db)
+
+	// Usecase Layer
+	// usecase := NewTreatyUseCase(treatyRepo)
+
+	// Route
+	route := chi.NewRouter()
+	route.Route("/v1", func(r chi.Router) {
+		r.Mount("/healthz", handlers.NewHealthzHandler())
+	})
+
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: handlers,
+		Handler: route,
 	}
 
 	app := &App{
