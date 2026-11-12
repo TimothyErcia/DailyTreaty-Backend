@@ -3,15 +3,14 @@ SELECT * FROM Task;
 
 -- name: GetTaskByCategory :many
 SELECT * FROM Task
-GROUP BY CATEGORY_TYPE;
+WHERE category_type = $1;
 
 -- name: CreateTask :one
 INSERT INTO Task (
-  taskId,
   category_type,
   last_update_by,
   price
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3
 )
 RETURNING *;
