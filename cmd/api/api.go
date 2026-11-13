@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -53,7 +52,6 @@ func NewTreatyAPI(cfg *model.Config, db *pgxpool.Pool) *App {
 }
 
 func (app *App) Run() error {
-	fmt.Printf("Listening to %s at port %s\n", app.Config.Host, app.Config.Port)
 	if err := app.Server.ListenAndServe(); err != nil {
 		return err
 	}

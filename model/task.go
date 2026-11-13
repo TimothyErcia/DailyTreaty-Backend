@@ -17,9 +17,9 @@ var (
 
 // TaskPayload Model
 type TaskPayload struct {
-	CategoryType string
-	LastUpdateBy string
-	Price        int32
+	CategoryType string `json:"categoryType"`
+	LastUpdateBy string `json:"lastupdateBy"`
+	Price        int32  `json:"price"`
 }
 
 // Task Model
