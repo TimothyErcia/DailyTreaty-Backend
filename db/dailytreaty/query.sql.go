@@ -7,36 +7,27 @@ package dailytreaty
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const createTask = `-- name: CreateTask :one
 INSERT INTO Task (
-  taskId,
   category_type,
   last_update_by,
   price
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3
 )
 RETURNING taskid, category_type, created_date, last_update_date, last_update_by, price
 `
 
 type CreateTaskParams struct {
-	Taskid       uuid.UUID
 	CategoryType string
 	LastUpdateBy string
 	Price        int32
 }
 
 func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, error) {
-	row := q.db.QueryRow(ctx, createTask,
-		arg.Taskid,
-		arg.CategoryType,
-		arg.LastUpdateBy,
-		arg.Price,
-	)
+	row := q.db.QueryRow(ctx, createTask, arg.CategoryType, arg.LastUpdateBy, arg.Price)
 	var i Task
 	err := row.Scan(
 		&i.Taskid,
@@ -82,11 +73,11 @@ func (q *Queries) GetAllTask(ctx context.Context) ([]Task, error) {
 
 const getTaskByCategory = `-- name: GetTaskByCategory :many
 SELECT taskid, category_type, created_date, last_update_date, last_update_by, price FROM Task
-GROUP BY CATEGORY_TYPE
+WHERE category_type = $1
 `
 
-func (q *Queries) GetTaskByCategory(ctx context.Context) ([]Task, error) {
-	rows, err := q.db.Query(ctx, getTaskByCategory)
+func (q *Queries) GetTaskByCategory(ctx context.Context, categoryType string) ([]Task, error) {
+	rows, err := q.db.Query(ctx, getTaskByCategory, categoryType)
 	if err != nil {
 		return nil, err
 	}

@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"log"
+	"log/slog"
 
 	"RNTreaty/model"
 
@@ -12,8 +12,13 @@ import (
 func ConnectDB(ctx context.Context, cfg *model.Config) *pgxpool.Pool {
 	pool, err := pgxpool.New(ctx, cfg.ConnectionURL)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error(err.Error())
 	}
 
+	if pingErr := pool.Ping(ctx); pingErr != nil {
+		slog.Error(pingErr.Error())
+	}
+
+	slog.Info("Listening to %s at port %s\n", cfg.Host, cfg.Port)
 	return pool
 }

@@ -1,10 +1,28 @@
 package model
 
 import (
+	"context"
+	"errors"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// Error Types
+var (
+	ErrNotFound     = errors.New("task not found")
+	ErrCategoryType = errors.New("category not found")
+	ErrInvalidPrice = errors.New("task price is invalid")
+)
+
+// TaskPayload Model
+type TaskPayload struct {
+	CategoryType string `json:"categoryType"`
+	LastUpdateBy string `json:"lastupdateBy"`
+	Price        int32  `json:"price"`
+}
+
+// Task Model
 type Task struct {
 	Taskid         uuid.UUID          `json:"taskId"`
 	CategoryType   string             `json:"categoryType"`
@@ -14,10 +32,10 @@ type Task struct {
 	Price          int32              `json:"price"`
 }
 
-type TaskUsecase interface {
-	CreateTask(Task) (Task, error)
+type TaskRepository interface {
+	CreateTask(context context.Context, taskPayload *TaskPayload) error
 }
 
-type TaskRepository interface {
-	CreateTask(Task) (Task, error)
+type TaskUsecase interface {
+	CreateTask(context context.Context, taskpayload *TaskPayload) error
 }
