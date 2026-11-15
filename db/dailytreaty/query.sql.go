@@ -7,6 +7,8 @@ package dailytreaty
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const createTask = `-- name: CreateTask :one
@@ -101,4 +103,27 @@ func (q *Queries) GetTaskByCategory(ctx context.Context, categoryType string) ([
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateTask = `-- name: UpdateTask :exec
+UPDATE Task
+  SET category_type = $2, last_update_by = $3, price = $4 
+  WHERE taskId = $1
+`
+
+type UpdateTaskParams struct {
+	Taskid       uuid.UUID
+	CategoryType string
+	LastUpdateBy string
+	Price        int32
+}
+
+func (q *Queries) UpdateTask(ctx context.Context, arg UpdateTaskParams) error {
+	_, err := q.db.Exec(ctx, updateTask,
+		arg.Taskid,
+		arg.CategoryType,
+		arg.LastUpdateBy,
+		arg.Price,
+	)
+	return err
 }

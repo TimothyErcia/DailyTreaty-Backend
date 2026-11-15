@@ -14,3 +14,8 @@ INSERT INTO Task (
   $1, $2, $3
 )
 RETURNING *;
+
+-- name: UpdateTask :exec
+UPDATE Task
+  SET category_type = $2, last_update_by = $3, price = $4 
+  WHERE taskId = $1;

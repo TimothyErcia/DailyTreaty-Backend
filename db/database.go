@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"RNTreaty/model"
@@ -19,6 +20,6 @@ func ConnectDB(ctx context.Context, cfg *model.Config) *pgxpool.Pool {
 		slog.Error(pingErr.Error())
 	}
 
-	slog.Info("Listening to %s at port %s\n", cfg.Host, cfg.Port)
+	slog.Info(fmt.Sprintf("Listening to %s at port %s\n", cfg.Host, cfg.Port))
 	return pool
 }
