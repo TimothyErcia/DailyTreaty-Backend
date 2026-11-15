@@ -33,7 +33,7 @@ func (taskUsecase *TaskUsecase) CreateTask(context context.Context, taskPayload 
 // UpdateTask implements [model.TaskUsecase].
 func (taskUsecase *TaskUsecase) UpdateTask(context context.Context, taskID *string, newTask *model.TaskPayload) error {
 	if taskID == nil {
-		return model.ErrTaskIDMissing
+		return model.ErrMissingTaskID
 	}
 
 	payloadErr := validateTaskPayload(newTask)
@@ -43,7 +43,7 @@ func (taskUsecase *TaskUsecase) UpdateTask(context context.Context, taskID *stri
 
 	convertedID, parseErr := uuid.Parse(*taskID)
 	if parseErr != nil {
-		return model.ErrTaskIDMissing
+		return model.ErrMissingTaskID
 	}
 
 	if taskUpdateErr := taskUsecase.repo.UpdateTask(context, &convertedID, newTask); taskUpdateErr != nil {

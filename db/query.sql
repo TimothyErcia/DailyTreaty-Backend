@@ -27,3 +27,8 @@ WHERE TaskId = $1;
 -- name: DeleteTaskByCategory :execrows
 DELETE FROM Task
 WHERE category_type = $1;
+
+-- name: UpdateTask :exec
+UPDATE Task
+  SET category_type = $2, last_update_by = $3, price = $4 
+  WHERE taskId = $1;

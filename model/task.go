@@ -48,14 +48,14 @@ type TaskDeletePayload struct {
 
 type TaskRepository interface {
 	CreateTask(context context.Context, taskPayload *TaskPayload) (*Task, error)
-	UpdateTask(context context.Context, taskID *uuid.UUID, newTask *TaskPayload) error
 	DeleteTaskByID(context context.Context, taskID *uuid.UUID) (*[]Task, error)
 	DeleteTaskByCategory(context context.Context, categoryType *string) (*[]Task, error)
+	UpdateTask(context context.Context, taskID *uuid.UUID, newTask *TaskPayload) error
 }
 
 type TaskUsecase interface {
 	CreateTask(context context.Context, taskpayload *TaskPayload) (*Task, error)
-	UpdateTask(context context.Context, taskID *string, newTask *TaskPayload) error
 	DeleteTaskByID(context context.Context, taskID *string) (*[]Task, error)
 	DeleteTaskByCategory(context context.Context, categoryType *string) (*[]Task, error)
+	UpdateTask(context context.Context, taskID *string, newTask *TaskPayload) error
 }

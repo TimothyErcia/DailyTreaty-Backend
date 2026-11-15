@@ -25,6 +25,7 @@ func NewTaskHandler(taskUsecase model.TaskUsecase) *chi.Mux {
 	route.Post("/create", taskHandler.createTask)
 	route.Patch("/update", taskHandler.updateTask)
 	route.Delete("/delete", taskHandler.deleteTask)
+	route.Patch("/update", taskHandler.updateTask)
 	return route
 }
 
@@ -143,4 +144,31 @@ func (taskHandler *TaskHandler) deleteTask(w http.ResponseWriter, r *http.Reques
 	if writeErr := utils.WriteJSON(w, deleteResponse.Response.Code, deleteResponse); writeErr != nil {
 		slog.Error(writeErr.Error())
 	}
+}
+
+func (taskHandler *TaskHandler) updateTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	payload := &model.TaskUpdatePayload{}
+	if decodeErr := utils.DecodeJSON(r, payload); decodeErr != nil {
+		errorResponse(w, http.StatusBadRequest, decodeErr.Error())
+		slog.Error(decodeErr.Error())
+	}
+
+	if updateErr := taskHandler.taskUsecase.UpdateTask(ctx, &payload.Taskid, &payload.TaskPayload); updateErr != nil {
+		errorResponse(w, http.StatusBadRequest, updateErr.Error())
+		slog.Error(updateErr.Error())
+	}
+
+	updateResponse := &model.GenericResponse{
+		Code:    http.StatusOK,
+		Message: "Task updated successfully",
+		Success: true,
+	}
+	if writeErr := utils.WriteJSON(w, updateResponse.Code, updateResponse); writeErr != nil {
+		errorResponse(w, http.StatusBadRequest, writeErr.Error())
+		slog.Error(writeErr.Error())
+	}
+
+	slog.Info(fmt.Sprintf("Update Task API requested by %s", payload.LastUpdateBy))
 }
