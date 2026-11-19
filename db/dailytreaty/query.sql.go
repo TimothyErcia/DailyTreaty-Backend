@@ -42,6 +42,32 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 	return i, err
 }
 
+const deleteTaskByCategory = `-- name: DeleteTaskByCategory :execrows
+DELETE FROM Task
+WHERE category_type = $1
+`
+
+func (q *Queries) DeleteTaskByCategory(ctx context.Context, categoryType string) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteTaskByCategory, categoryType)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const deleteTaskByID = `-- name: DeleteTaskByID :execrows
+DELETE FROM Task
+WHERE TaskId = $1
+`
+
+func (q *Queries) DeleteTaskByID(ctx context.Context, taskid uuid.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteTaskByID, taskid)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getAllTask = `-- name: GetAllTask :many
 SELECT taskid, category_type, created_date, last_update_date, last_update_by, price FROM Task
 `
