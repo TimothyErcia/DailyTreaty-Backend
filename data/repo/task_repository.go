@@ -6,6 +6,7 @@ import (
 	"RNTreaty/db/dailytreaty"
 	"RNTreaty/model"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -33,4 +34,72 @@ func (repo *TaskRepository) CreateTask(context context.Context, taskPayload *mod
 	}
 
 	return nil
+}
+
+func parseDBTypeToModel(ctx context.Context, qtx *dailytreaty.Queries) (*[]model.Task, error) {
+	allTask, allTaskErr := qtx.GetAllTask(ctx)
+	if allTaskErr != nil {
+		return nil, allTaskErr
+	}
+
+	var convertTask []model.Task
+	for _, task := range allTask {
+		convertTask = append(convertTask, model.Task(task))
+	}
+
+	return &convertTask, nil
+}
+
+// DeleteTaskByID implements [model.TaskRepository].
+func (repo *TaskRepository) DeleteTaskByID(ctx context.Context, taskID *uuid.UUID) (*[]model.Task, error) {
+	tx, err := repo.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	queries := dailytreaty.New(repo.db)
+	qtx := queries.WithTx(tx)
+
+	validRows, deleteErr := qtx.DeleteTaskByID(ctx, *taskID)
+	if deleteErr != nil {
+		return nil, deleteErr
+	}
+
+	if validRows == 0 {
+		return nil, model.ErrMissingTaskID
+	}
+
+	convertTask, convertErr := parseDBTypeToModel(ctx, qtx)
+	if convertErr != nil {
+		return nil, convertErr
+	}
+
+	return convertTask, tx.Commit(ctx)
+}
+
+// DeleteTaskByCategory implements [model.TaskRepository].
+func (repo *TaskRepository) DeleteTaskByCategory(ctx context.Context, categoryType *string) (*[]model.Task, error) {
+	tx, error := repo.db.Begin(ctx)
+	if error != nil {
+		return nil, error
+	}
+
+	query := dailytreaty.New(repo.db)
+	qtx := query.WithTx(tx)
+	validRow, deleteErr := query.DeleteTaskByCategory(ctx, *categoryType)
+	if deleteErr != nil {
+		return nil, deleteErr
+	}
+
+	if validRow == 0 {
+		return nil, model.ErrCategoryType
+	}
+
+	convertTask, convertErr := parseDBTypeToModel(ctx, qtx)
+	if convertErr != nil {
+		return nil, convertErr
+	}
+
+	return convertTask, tx.Commit(ctx)
 }

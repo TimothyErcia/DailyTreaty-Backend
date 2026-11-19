@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"RNTreaty/model"
+
+	"github.com/google/uuid"
 )
 
 type TaskUsecase struct {
@@ -32,4 +34,27 @@ func (taskUsecase *TaskUsecase) CreateTask(context context.Context, taskPayload 
 	}
 
 	return nil
+}
+
+// DeleteTaskByID implements [model.TaskUsecase].
+func (taskUsecase *TaskUsecase) DeleteTaskByID(context context.Context, taskID *string) (*[]model.Task, error) {
+	if taskID == nil {
+		return nil, model.ErrMissingTaskID
+	}
+
+	convertedID, parseErr := uuid.Parse(*taskID)
+	if parseErr != nil {
+		return nil, parseErr
+	}
+
+	return taskUsecase.repo.DeleteTaskByID(context, &convertedID)
+}
+
+// DeleteTaskByCategory implements [model.TaskUsecase].
+func (taskUsecase *TaskUsecase) DeleteTaskByCategory(context context.Context, categoryType *string) (*[]model.Task, error) {
+	if categoryType == nil {
+		return nil, model.ErrMissingTaskID
+	}
+
+	return taskUsecase.repo.DeleteTaskByCategory(context, categoryType)
 }
