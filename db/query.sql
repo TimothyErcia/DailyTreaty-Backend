@@ -14,3 +14,11 @@ INSERT INTO Task (
   $1, $2, $3
 )
 RETURNING *;
+
+-- name: DeleteTaskByID :execrows
+DELETE FROM Task
+WHERE TaskId = $1;
+
+-- name: DeleteTaskByCategory :execrows
+DELETE FROM Task
+WHERE category_type = $1;
